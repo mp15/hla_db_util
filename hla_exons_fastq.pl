@@ -53,7 +53,7 @@ print $hla{$key}{3}."\n";
 }
 foreach my $key (sort keys %hla) {
 next if ($key !~ /^HLA-D(RB[1345]|[PQ][AB]1).*/);
-next if ($key =~ /^HLA-DRB4*03:01N/; # No exon 2 data
+next if ($key =~ /^HLA-DRB4\*03:01N/); # No exon 2 data
 print ">${key}\n";
 print $hla{$key}{2}."\n";
 }

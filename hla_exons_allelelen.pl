@@ -24,21 +24,13 @@ while ( (my $seq = $stream->next_seq()) ) {
         my $cds_tag = $cds[0];
         my @gene = $cds_tag->get_tag_values('gene');
         my @allele = $cds_tag->get_tag_values('allele');
-        if (scalar @gene == 1 && ($gene[0] =~ /HLA-[A-C]/ || $gene[0] =~ /HLA-D[QPR].*/ )) {
+        if (scalar @gene == 1 && ($gene[0] =~ /HLA-[A-C]/ || $gene[0] =~ /HLA-D[QPR][AB][1-5].*/ )) {
             my $gene_name = $gene[0];
             my $allele_name = $allele[0];
             my @features = $seq->get_SeqFeatures();
             my @allele_split = split /\*/, $allele_name;
             my @allele_breakdown = split /:/, $allele_split[1];
-++$hla{$gene_name}{scalar @allele_breakdown};
-            foreach my $feature (@features) {
-                if ($feature->primary_tag eq  'exon') {
-                    my @number = $feature->get_tag_values('number');
-                    if ($number[0] eq '2') {
-#                         print ">".@allele_split[1]."\n".$feature->seq()->seq()."\n";
-                    }
-                }
-            }
+            ++$hla{$gene_name}{scalar @allele_breakdown};
        }
     } else {
         ++$psuedo_gene;
@@ -46,10 +38,20 @@ while ( (my $seq = $stream->next_seq()) ) {
     ++$num_seq;
 }
 print "There are $num_seq sequences in this file\n";
+print "Digits/Alleles\t";
 foreach my $key (sort keys %hla) {
-print "${key}\n";
-foreach my $count (sort keys $hla{$key}) {
-    print "$count = ".$hla{$key}{$count}."\n";
+    print "\t${key}";
 }
+print "\n";
+foreach my $count (2..4) {
+    print "$count\t";
+    foreach my $key (sort keys %hla) {
+        if (exists $hla{$key}{$count}) {
+            print "\t".$hla{$key}{$count};
+        } else {
+            print "\t0";
+        }
+    }
+    print "\n";
 }
 print "Psuedo genes $psuedo_gene\n";
