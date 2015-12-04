@@ -32,7 +32,7 @@ while ( (my $seq = $stream->next_seq()) ) {
             foreach my $feature (@features) {
                 if ($feature->primary_tag eq  'exon') {
                     my @number = $feature->get_tag_values('number');
-                    if ($number[0] eq '2' || $number[0] eq '3') {
+                    if ($number[0] eq '2' || $number[0] eq '3' || $number[0] eq '4') {
                          $hla{$allele_name}{$number[0]} = $feature->seq()->seq();
                     }
                 }
@@ -49,12 +49,16 @@ next if ($key !~ /^HLA-[A-C].*/);
 print ">${key}\n";
 print $hla{$key}{2};
 for (my $i=0; $i<100;++$i) {print 'N';}
-print $hla{$key}{3}."\n";
+print $hla{$key}{3};
+for (my $i=0; $i<100;++$i) {print 'N';}
+print $hla{$key}{4}."\n";
 }
 foreach my $key (sort keys %hla) {
 next if ($key !~ /^HLA-D(RB[1345]|[PQ][AB]1).*/);
 next if ($key =~ /^HLA-DRB4\*03:01N/); # No exon 2 data
 print ">${key}\n";
-print $hla{$key}{2}."\n";
+print $hla{$key}{2};
+for (my $i=0; $i<100;++$i) {print 'N';}
+print $hla{$key}{3}."\n";
 }
 print STDERR "Psuedo genes $psuedo_gene\n";
