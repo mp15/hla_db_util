@@ -51,14 +51,16 @@ print $hla{$key}{2};
 for (my $i=0; $i<100;++$i) {print 'N';}
 print $hla{$key}{3};
 for (my $i=0; $i<100;++$i) {print 'N';}
-print $hla{$key}{4}."\n";
+print $hla{$key}{4} if exists $hla{$key}{4};
+print "\n";
 }
 foreach my $key (sort keys %hla) {
 next if ($key !~ /^HLA-D(RB[1345]|[PQ][AB]1).*/);
 next if ($key =~ /^HLA-DRB4\*03:01N/); # No exon 2 data
 print ">${key}\n";
-print $hla{$key}{2};
+print $hla{$key}{2} if exists $hla{$key}{2};
 for (my $i=0; $i<100;++$i) {print 'N';}
-print $hla{$key}{3}."\n";
+print $hla{$key}{3} if exists $hla{$key}{3};
+print"\n";
 }
 print STDERR "Psuedo genes $psuedo_gene\n";
