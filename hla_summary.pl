@@ -31,6 +31,6 @@ while ( (my $seq = $stream->next_seq()) ) {
 print "There are $num_seq sequences in this file\n";
 foreach my $key (sort keys %hla) {
 print "of which ".$hla{$key}." are from $key\n";
-print "of which ".$partial_count{$key}."\n";
+print "of which ".$partial_count{$key}." are partial sequences\n" if exists $partial_count{$key};
 }
 print "Psuedo genes $psuedo_gene\n";
