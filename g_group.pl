@@ -17,10 +17,10 @@ while (<$ref_fh>) {
     next if $_ =~ /^#/;
 	my @a = split /;/;
     if (scalar @a == 2) {
-        $ref_in{"$a[0]$a[1]"} = "$a[0]$a[1]";
+        $ref_in{"HLA-$a[0]$a[1]"} = "HLA-$a[0]$a[1]";
     } else {
         foreach my $b (split(/\//, $a[1])) {
-            $ref_in{"$a[0]$b"} = "$a[0]$a[2]";
+            $ref_in{"HLA-$a[0]$b"} = "HLA-$a[0]$a[2]";
         }
     }
 }
@@ -30,6 +30,11 @@ my $input_fh;
 open($input_fh, "<-") or die "Cannot open stdin";
 while (<$input_fh>) {
     chomp;
-    print $ref_in{$_}."\n";
+    if (exists($ref_in{$_})) {
+        print $ref_in{$_}."\n";
+    } else {
+        print $_."\n";
+	print STDERR "Warning unknown allele: $_\n"
+    }
 }
 close $input_fh;
