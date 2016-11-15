@@ -17,9 +17,21 @@ while (<$ref_fh>) {
     next if $_ =~ /^#/;
 	my @a = split /;/;
     if (scalar @a == 2) {
-        $ref_in{"HLA-$a[0]$a[1]"} = "HLA-$a[0]$a[1]";
+        my @fields = split(/:/,$a[1]);
+        if (scalar @fields == 4) {
+            my $three = join(':', @fields[0..2]);
+            $ref_in{"HLA-$a[0]$a[1]"} = "HLA-$a[0]${three}G";
+        } else {
+            $ref_in{"HLA-$a[0]$a[1]"} = "HLA-$a[0]$a[1]";
+        }
     } else {
         foreach my $b (split(/\//, $a[1])) {
+            my @fields = split(/:/,$b);
+            if (scalar @fields == 4) {
+                my $three = join(':', @fields[0..2]);
+                $ref_in{"HLA-$a[0]$three"} = "HLA-$a[0]$a[2]";
+            }
+
             $ref_in{"HLA-$a[0]$b"} = "HLA-$a[0]$a[2]";
         }
     }
