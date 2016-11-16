@@ -9,6 +9,7 @@ use warnings;
 my $ref = $ARGV[0];
 my $from = $ARGV[1];
 my $to = $ARGV[2];
+my $hard = $ARGV[3];
 
 my $ref_fh;
 my %ref_in;
@@ -26,7 +27,7 @@ my $to_id = $version_id{$to};
 my %translate;
 while (<$ref_fh>) {
 	my @a = split /\t/;
-	$translate{$a[$from_id]} = $a[$to_id];
+	$translate{"HLA-$a[$from_id]"} = "HLA-$a[$to_id]";
 }
 
 my $input_fh;
@@ -34,9 +35,10 @@ open($input_fh, "<-") or die "Cannot open stdin";
 while (<$input_fh>) {
     chomp;
     if (exists($translate{$_})) {
-        print $translate{$_}."\n";
+        print "$translate{$_}\n";
     } else {
-	die "Warning unknown allele: $_\n"
+	die "Warning unknown allele: $_\n" if $hard;
+	print "$_\n";
     }
 }
 close $input_fh;
