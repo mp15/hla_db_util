@@ -38,22 +38,27 @@ while (<$ref_fh>) {
 }
 close $ref_fh;
 
-foreach my $key (keys %ref_in) {
+foreach my $key (sort keys %ref_in) {
 	my $value = $ref_in{$key};
 	my @fields = split(/:/,$value);
 	my $two = join(':', @fields[0..1]);
 	$ref_in{$two} = $value if !exists($ref_in{$two});
 }
 
-my $input_fh;
-open($input_fh, "<-") or die "Cannot open stdin";
+sub translate($$)
+{
+    my ($ref_data, $query) = @_;
+    if (exists($ref_data->{$query})) {
+        return($ref_data->{$query});
+    } else {
+        print STDERR "Warning unknown allele: ${query}\n";
+        return($query);
+    }
+}
+
+open(my $input_fh, "<-") or die "Cannot open stdin";
 while (<$input_fh>) {
 	chomp;
-	if (exists($ref_in{$_})) {
-		print $ref_in{$_}."\n";
-	} else {
-		print $_."\n";
-		print STDERR "Warning unknown allele: $_\n"
-	}
+    print translate(\%ref_in,$_)."\n";
 }
 close $input_fh;
