@@ -53,7 +53,7 @@ while ( (my $seq = $stream->next_seq()) ) {
 print "There are $num_seq sequences in this file\n";
 foreach my $key (sort keys %hla) {
 print "[$key]\n";
-foreach my $allele (sort { length $a <=> length $b } keys $hla{$key}) {
+foreach my $allele (sort { length $a <=> length $b } keys %{$hla{$key}}) {
     print "$allele = ".$hla{$key}{$allele}."\n";
 }
 #foreach my $vec (sort keys $hla{$key}) {

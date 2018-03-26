@@ -36,9 +36,10 @@ while (<$input_fh>) {
     chomp;
     if (exists($translate{$_})) {
         print "$translate{$_}\n";
+	print STDERR "T ($_)\n";
     } else {
 	die "Warning unknown allele: $_\n" if $hard;
-	print "$_\n";
+	print STDERR "U$_\n";
     }
 }
 close $input_fh;

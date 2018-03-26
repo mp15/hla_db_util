@@ -4,7 +4,7 @@ library(ggplot2)
 plot.variationvec <- function(gene){
     align <-read.alignment(paste0(gene,'_gen.msf'),'msf')
     align_matrix <- as.matrix(align)
-    dist_align <- dist.alignment(align)
+    #dist_align <- dist.alignment(align)
 
     allele.vector <- function(align.matrix) {
         apply(align_matrix,2, function(vec) {length(table(vec[vec!='-']))-1})
@@ -12,8 +12,25 @@ plot.variationvec <- function(gene){
     variation_vec <- allele.vector(align_matrix)
     #For some reason there are sites where we have no data in the alignment?
     variation_vec[variation_vec==-1] <- NA
-    vp <- ggplot(data.frame(Position=seq_along(variation_vec),Variants=variation_vec), aes(Position,Variants)) + geom_bar(stat="identity") + ggtitle(toupper(gene))
-    ggsave(paste0(gene,'_variations.pdf'),vp)
+    vp <- ggplot(data.frame(Position=seq_along(variation_vec),Variants=variation_vec), aes(Position,Variants)) + geom_bar(stat="identity") + ggtitle(toupper(gene)) + coord_fixed(ratio = 500)
+
+    ggsave(paste0(gene,'_variations.pdf'),vp, height=4)
+}
+plot.variationvec_alleles <- function(gene){
+    align <-read.alignment(paste0(gene,'_gen.msf'),'msf')
+    alleles <- unlist(read.table('A.allele_list'))
+    align_matrix <- as.matrix(align)
+    align_matrix <- align_matrix[alleles,]
+    #dist_align <- dist.alignment(align)
+
+    allele.vector <- function(align.matrix) {
+        apply(align_matrix,2, function(vec) {length(table(vec[vec!='-']))-1})
+    }
+    variation_vec <- allele.vector(align_matrix)
+    #For some reason there are sites where we have no data in the alignment?
+    variation_vec[variation_vec==-1] <- NA
+    vp <- ggplot(data.frame(Position=seq_along(variation_vec),Variants=variation_vec), aes(Position,Variants)) + geom_bar(stat="identity") + ggtitle(toupper(gene) + coord_fixed(ratio = 500))
+    ggsave(paste0(gene,'_variations_gdap.pdf'),vp, height=4)
 }
 
 #plot number of vario
@@ -30,3 +47,7 @@ for (i in c('a','b','c','dpa1','dpb1','dqa1','dqb1','drb1', 'drb3','drb4','drb5'
 
 #dist_align.melted <- melt(as.matrix(dist_align))
 #ggplot(dist_align.melted, aes(x = Var1, y = Var2, fill = value)) + geom_tile()
+
+for (i in c('a','b','c','dpb1','dqa1','dqb1','drb1')) {
+    plot.variationvec_alleles(i)
+}
