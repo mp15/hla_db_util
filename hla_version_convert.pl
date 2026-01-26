@@ -36,7 +36,19 @@ my $ref_fh;
 my %ref_in;
 open($ref_fh, "<", $ref) or die "Could not open allele_history $ref";
 
-my @header = split(/\t/,<$ref_fh>);
+
+my @header;
+while (<$ref_fh>) {
+	chomp;
+
+	if (/^HLA_ID/) {
+		@header = split(/,/,$_);
+		last;
+	}
+}
+if (scalar(@header) == 0) {
+	die "Could not find header line in allele history file $ref\n";
+}
 
 my $i = 0;
 my %version_id;
@@ -53,7 +65,7 @@ my $from_id = $version_id{$from};
 my $to_id = $version_id{$to};
 my %translate;
 while (<$ref_fh>) {
-	my @a = split /\t/;
+	my @a = split /,/;
 	$translate{"HLA-$a[$from_id]"} = "HLA-$a[$to_id]";
 }
 
