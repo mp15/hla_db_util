@@ -78,6 +78,12 @@ sub translate($$)
 open(my $input_fh, "<-") or die "Cannot open stdin";
 while (<$input_fh>) {
 	chomp;
+	# Pass through missing allele indicators
+	if ( $_ eq "****" ) {
+		print "****\n";
+		next;
+	}
+
     print translate(\%ref_in,$_)."\n";
 }
 close $input_fh;
