@@ -21,6 +21,7 @@
 
 use strict;
 use warnings;
+use List::MoreUtils qw(uniq);
 
 # Usage g_group.pl <ref_g_groups>
 # reads input from STDIN and writes converted output to STDOUT
@@ -84,6 +85,7 @@ while (<$input_fh>) {
 		next;
 	}
 
-    print translate(\%ref_in,$_)."\n";
+	my @translated = map { translate(\%ref_in, $_) } split(/\//,$_);
+	print join("/", uniq @translated)."\n";
 }
 close $input_fh;
