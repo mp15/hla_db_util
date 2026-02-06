@@ -87,7 +87,17 @@ sub one_field_compare($$) {
 
 sub full_field_compare($$) {
 	my ($allele_a, $allele_b) = @_;
-	return 1 if $allele_a eq $allele_b;
+	my (@allele_a_gene_allele) = split /\//, $allele_a;
+	my (@allele_b_gene_allele) = split /\//, $allele_b;
+	my %count = ();
+
+	foreach my $element (@allele_a_gene_allele, @allele_b_gene_allele) { $count{$element}++ }
+	foreach my $element (keys %count) {
+		if ($count{$element} > 1) {
+			return 1;
+		}
+	}
+
 	return 0;
 }
 
@@ -177,8 +187,8 @@ sub print_n_field_matches($$\%\%) {
 
 	print $output_n_fh "Gene\tMatches\tTotal\tProportion\tMissing SBT\tMissing Compared\n";
 	foreach $allele (sort keys %hiseqx_data) {
-		next if (!exists $sanger_data{$allele});
-		printf($output_n_fh "${allele}\t".$allele_count{$allele}{matches}."\t".$allele_count{$allele}{total}."\t"."%.3f\t",$allele_count{$allele}{matches}/$allele_count{$allele}{total}.$allele_count{$allele}{missing_sanger}."\t".$allele_count{$allele}{missing_other}."\n");
+		next if (!exists $sanger_data{$allele}) or ($allele_count{$allele}{total} == 0);
+		printf($output_n_fh "${allele}\t%d\t%d\t%.3f\t%d\t%d\n",$allele_count{$allele}{matches},$allele_count{$allele}{total},$allele_count{$allele}{matches}/$allele_count{$allele}{total},$allele_count{$allele}{missing_sanger},$allele_count{$allele}{missing_other});
 	}
 	close($output_n_fh);
 }
@@ -211,7 +221,7 @@ sub parse_flat($) {
 	while (my $input = <$flat_fh>) {
 		chomp $input;
 		my @fields = split /\t/, $input;
-		next if $fields[2] eq 'NA'; #handle the null case
+		next if $fields[2] eq '0000'; #handle the null case
 		$fields[1] = "$fields[1]";
 		$fields[2] = "$fields[2]";
 		if (exists $flat_data{$fields[1]} && exists $flat_data{$fields[1]}{$fields[0]}) {
