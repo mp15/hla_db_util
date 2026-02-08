@@ -22,17 +22,15 @@
 use strict;
 use warnings;
 
-use HLA qw(print_full_matches_multi print_three_field_matches_multi print_two_field_matches_multi print_one_field_matches_multi parse_multiresfile);
+use HLA qw(print_full_matches parse_flat print_full_matches_multi);
 
 my $ref = $ARGV[0];
 my $input = $ARGV[1];
 my $output_full = $ARGV[2];
 my $output_one = $ARGV[3];
 my $error_name = $ARGV[4];
-open(my $error_fh, ">", $error_name) or die "Could not open $error_name for writing.";
 
-my %validation_data_hash = parse_multiresfile($ref);
-my %input_data = parse_multiresfile($input);
+my %validation_data_hash = parse_flat($ref);
+my %input_data = parse_flat($input);
 
-print_full_matches_multi($output_full,$error_fh,%ref_data, %input_data);
-close($error_fh);
+print_full_matches($output_full,$error_name,%validation_data_hash, %input_data);

@@ -101,95 +101,101 @@ sub full_field_compare($$) {
 	return 0;
 }
 
-sub print_full_matches($\%\%) {
+sub print_full_matches($$\%\%) {
 	my $compare_func = \&full_field_compare;
 	unshift(@_, $compare_func);
 	print_n_field_matches(@_);
 }
 
-sub print_three_field_matches($\%\%) {
+sub print_three_field_matches($$\%\%) {
 	my $compare_func = \&three_field_compare;
 	unshift(@_, $compare_func);
 	print_n_field_matches(@_);
 }
 
-sub print_two_field_matches($\%\%) {
+sub print_two_field_matches($$\%\%) {
 	my $compare_func = \&two_field_compare;
 	unshift(@_, $compare_func);
 	print_n_field_matches(@_);
 }
 
-sub print_one_field_matches($\%\%) {
+sub print_one_field_matches($$\%\%) {
 	my $compare_func = \&one_field_compare;
 	unshift(@_, $compare_func);
 	print_n_field_matches(@_);
 }
 
-sub print_n_field_matches($$\%\%) {
-	my ($compare_func,$output_n_name,$sanger_data_h, $hiseqx_data_h) = @_;
+sub print_n_field_matches($$$\%\%) {
+	my ($compare_func, $output_n_name, $error_output, $ref_data_h, $input_data_h) = @_;
 	open (my $output_n_fh, ">", $output_n_name) or die "Cannot open output file for ".svref_2object($compare_func)->GV->NAME." matches $output_n_name";
+	open (my $error_output_fh, ">", $error_output) or die "Cannot open error output file $error_output";
 	my %allele_count;
-	my $allele;
+	my $gene;
 	my $sample;
-	my %sanger_data = %$sanger_data_h;
-	my %hiseqx_data = %$hiseqx_data_h;
+	my %ref_data = %$ref_data_h;
+	my %input_data = %$input_data_h;
 
-	foreach $allele (keys %hiseqx_data) {
-		$allele_count{$allele}{matches} = 0;
-		$allele_count{$allele}{total} = 0;
-                $allele_count{$allele}{missing_sanger} = 0;
-                $allele_count{$allele}{missing_other} = 0;
-		next if (!exists $sanger_data{$allele} || !exists $hiseqx_data{$allele});
-		foreach $sample (keys %{$hiseqx_data{$allele}}) {
-			if (exists $sanger_data{$allele}{$sample} && exists $hiseqx_data{$allele}{$sample}) {
-				if (scalar @{$sanger_data{$allele}{$sample}} == 2 && scalar @{$hiseqx_data{$allele}{$sample}} == 2) {
-					if ((&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0]) &&
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[1])) ||
-						(&$compare_func($sanger_data{$allele}{$sample}[0], $hiseqx_data{$allele}{$sample}[1]) &&
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[0]))) {
-						$allele_count{$allele}{matches} += 2;
-					} elsif ((&$compare_func($sanger_data{$allele}{$sample}[0], $hiseqx_data{$allele}{$sample}[0]) ||
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[1])) ||
-						(&$compare_func($sanger_data{$allele}{$sample}[0], $hiseqx_data{$allele}{$sample}[1]) ||
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[0]))) {
-						$allele_count{$allele}{matches} += 1;
-					} else { print "mismatch2of2\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$sanger_data{$allele}{$sample}[0]."\t".$sanger_data{$allele}{$sample}[1],"\t".$hiseqx_data{$allele}{$sample}[0]."\t".$hiseqx_data{$allele}{$sample}[1]."\n";}
-				} elsif (scalar @{$sanger_data{$allele}{$sample}} == 1 && scalar @{$hiseqx_data{$allele}{$sample}} == 2) {
-					if (&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0]) &&
-						&$compare_func($sanger_data{$allele}{$sample}[0], $hiseqx_data{$allele}{$sample}[1])) {
-						$allele_count{$allele}{matches} += 2;
-					} elsif (&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0]) ||
-						&$compare_func($sanger_data{$allele}{$sample}[0], $hiseqx_data{$allele}{$sample}[1])) {
-						$allele_count{$allele}{matches} += 1;
-					} else {}
-				} elsif (scalar @{$sanger_data{$allele}{$sample}} == 2 && scalar @{$hiseqx_data{$allele}{$sample}} == 1) {
-					if (&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0]) &&
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[0])) {
-						$allele_count{$allele}{matches} += 2;
-					} elsif (&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0]) ||
-						&$compare_func($sanger_data{$allele}{$sample}[1], $hiseqx_data{$allele}{$sample}[0])) {
-						$allele_count{$allele}{matches} += 1;
-					} else {}
-				} elsif (scalar @{$sanger_data{$allele}{$sample}} == 1 && scalar @{$hiseqx_data{$allele}{$sample}} == 1) {
-					if (&$compare_func($sanger_data{$allele}{$sample}[0],$hiseqx_data{$allele}{$sample}[0])) {
-						$allele_count{$allele}{matches} += 2;
-					} else {}
+	foreach $gene (keys %input_data) {
+		$allele_count{$gene}{matches} = 0;
+		$allele_count{$gene}{total} = 0;
+		$allele_count{$gene}{missing_ref} = 0;
+		$allele_count{$gene}{missing_input} = 0;
+		next if (!exists $ref_data{$gene} || !exists $input_data{$gene});
+		foreach $sample (keys %{$input_data{$gene}}) {
+			if (exists $ref_data{$gene}{$sample} && exists $input_data{$gene}{$sample}) {
+				if (scalar @{$ref_data{$gene}{$sample}} == 2 && scalar @{$input_data{$gene}{$sample}} == 2) {
+					if ((&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) &&
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[1])) ||
+						(&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1]) &&
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0]))) {
+						$allele_count{$gene}{matches} += 2;
+					} elsif ((&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[0]) ||
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[1])) ||
+						(&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1]) ||
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0]))) {
+						$allele_count{$gene}{matches} += 1;
+					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";}
+				} elsif (scalar @{$ref_data{$gene}{$sample}} == 1 && scalar @{$input_data{$gene}{$sample}} == 2) {
+
+					if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) &&
+						&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1])) {
+						$allele_count{$gene}{matches} += 2;
+					} elsif (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) ||
+						&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1])) {
+						$allele_count{$gene}{matches} += 1;
+					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";}
+				} elsif (scalar @{$ref_data{$gene}{$sample}} == 2 && scalar @{$input_data{$gene}{$sample}} == 1) {
+					if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) &&
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0])) {
+						$allele_count{$gene}{matches} += 2;
+					} elsif (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) ||
+						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0])) {
+						$allele_count{$gene}{matches} += 1;
+					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\n";}
+				} elsif (scalar @{$ref_data{$gene}{$sample}} == 1 && scalar @{$input_data{$gene}{$sample}} == 1) {
+					if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0])) {
+						$allele_count{$gene}{matches} += 2;
+					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\n";}
 				}
 
-				$allele_count{$allele}{total} += 2;
-			} elsif (exists $sanger_data{$allele}{$sample} ) {
-                                $allele_count{$allele}{missing_sanger} += 2;
-                        } elsif (exists $hiseqx_data{$allele}{$sample}) {
-                                $allele_count{$allele}{missing_other} += 2;
-                        }
+				$allele_count{$gene}{total} += 2;
+			} elsif (exists $ref_data{$gene}{$sample} ) {
+				$allele_count{$gene}{missing_input} += 2;
+				print $error_output_fh "missing_input\t".$gene."\t".$sample."\n";
+			} elsif (exists $input_data{$gene}{$sample}) {
+				$allele_count{$gene}{missing_ref} += 2;
+				print $error_output_fh "missing_ref\t".$gene."\t".$sample."\n";
+			}
 		}
 	}
 
-	print $output_n_fh "Gene\tMatches\tTotal\tProportion\tMissing SBT\tMissing Compared\n";
-	foreach $allele (sort keys %hiseqx_data) {
-		next if (!exists $sanger_data{$allele}) or ($allele_count{$allele}{total} == 0);
-		printf($output_n_fh "${allele}\t%d\t%d\t%.3f\t%d\t%d\n",$allele_count{$allele}{matches},$allele_count{$allele}{total},$allele_count{$allele}{matches}/$allele_count{$allele}{total},$allele_count{$allele}{missing_sanger},$allele_count{$allele}{missing_other});
+	print $output_n_fh "Gene\tMatches\tTotal\tProportion\tMissing Ref\tMissing Input\n";
+	foreach $gene (sort keys %input_data) {
+		next if (!exists $ref_data{$gene}) or ($allele_count{$gene}{total} == 0);
+
+		printf($output_n_fh "${gene}\t%d\t%d\t%.3f\t%d\t%d\n",$allele_count{$gene}{matches},$allele_count{$gene}{total},$allele_count{$gene}{matches}/$allele_count{$gene}{total},$allele_count{$gene}{missing_ref},$allele_count{$gene}{missing_input});
 	}
+	close($error_output_fh);
 	close($output_n_fh);
 }
 
@@ -315,9 +321,10 @@ sub print_one_field_matches_multi($$\%\%) {
 	print_n_field_matches_multi(@_);
 }
 
-sub print_n_field_matches_multi($$\%\%) {
-	my ($compare_func,$output_two_name,$error_output,$sanger_data_h, $hiseqx_data_h) = @_;
-	open (my $output_full_fh, ">", $output_two_name) or die "Cannot open output file for full matches $output_two_name";
+sub print_n_field_matches_multi($$$\%\%) {
+	my ($compare_func,$output_n_name,$error_output,$sanger_data_h, $hiseqx_data_h) = @_;
+	open (my $output_n_fh, ">", $output_n_name) or die "Cannot open output file for n matches $output_n_name";
+	open (my $error_output_fh, ">", $error_output) or die "Cannot open error output file $error_output";
 	my %allele_count;
 	my $allele;
 	my $sample;
@@ -327,11 +334,11 @@ sub print_n_field_matches_multi($$\%\%) {
 	foreach $allele (keys %hiseqx_data) {
 		$allele_count{$allele}{matches} = 0;
 		$allele_count{$allele}{total} = 0;
-                $allele_count{$allele}{missing_sbt} = 0;
-                $allele_count{$allele}{missing_other} = 0;
-                $allele_count{$allele}{missing_both} = 0;
+		$allele_count{$allele}{missing_sbt} = 0;
+		$allele_count{$allele}{missing_other} = 0;
+		$allele_count{$allele}{missing_both} = 0;
 		next if (!exists $sanger_data{$allele} || !exists $hiseqx_data{$allele});
-		foreach $sample (keys %{$hiseqx_data{'HLA-A'}}) {
+		foreach $sample (keys %{$hiseqx_data{'A'}}) {
 			if (exists $sanger_data{$allele}{$sample} && exists $hiseqx_data{$allele}{$sample}) {
 				my @fixed_hiseqx;
 				if (scalar @{$hiseqx_data{$allele}{$sample}} == 1) {
@@ -365,12 +372,13 @@ sub print_n_field_matches_multi($$\%\%) {
 		}
 	}
 
-	print $output_full_fh "Gene\tMatches\tTotal\tProportion\tMissing SBT\tMissing Other\tMissing Both\n";
+	print $output_n_fh "Gene\tMatches\tTotal\tProportion\tMissing SBT\tMissing Other\tMissing Both\n";
 	foreach $allele (sort keys %hiseqx_data) {
-		next if (!exists $sanger_data{$allele});
-		printf($output_full_fh "${allele}\t".$allele_count{$allele}{matches}."\t".$allele_count{$allele}{total}."\t"."%.3f\t".$allele_count{$allele}{missing_sbt}."\t".$allele_count{$allele}{missing_other}."\t".$allele_count{$allele}{missing_both}."\n",$allele_count{$allele}{matches}/$allele_count{$allele}{total});
+		next if (!exists $sanger_data{$allele}) or ($allele_count{$allele}{total} == 0);
+		printf($output_n_fh "${allele}\t".$allele_count{$allele}{matches}."\t".$allele_count{$allele}{total}."\t"."%.3f\t".$allele_count{$allele}{missing_sbt}."\t".$allele_count{$allele}{missing_other}."\t".$allele_count{$allele}{missing_both}."\n",$allele_count{$allele}{matches}/$allele_count{$allele}{total});
 	}
-	close($output_full_fh);
+	close($error_output_fh);
+	close($output_n_fh);
 }
 
 1;
