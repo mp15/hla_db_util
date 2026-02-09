@@ -154,6 +154,7 @@ sub print_n_field_matches($$$\%\%) {
 						(&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1]) ||
 						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0]))) {
 						$allele_count{$gene}{matches} += 1;
+						print $error_output_fh "mismatch1of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";
 					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";}
 				} elsif (scalar @{$ref_data{$gene}{$sample}} == 1 && scalar @{$input_data{$gene}{$sample}} == 2) {
 
@@ -163,6 +164,11 @@ sub print_n_field_matches($$$\%\%) {
 					} elsif (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) ||
 						&$compare_func($ref_data{$gene}{$sample}[0], $input_data{$gene}{$sample}[1])) {
 						$allele_count{$gene}{matches} += 1;
+						if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0])) {
+							print $error_output_fh "mismatch1of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";
+						} else {
+							print $error_output_fh "mismatch1of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\n";
+						}
 					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[1]."\n";}
 				} elsif (scalar @{$ref_data{$gene}{$sample}} == 2 && scalar @{$input_data{$gene}{$sample}} == 1) {
 					if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) &&
@@ -171,6 +177,11 @@ sub print_n_field_matches($$$\%\%) {
 					} elsif (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0]) ||
 						&$compare_func($ref_data{$gene}{$sample}[1], $input_data{$gene}{$sample}[0])) {
 						$allele_count{$gene}{matches} += 1;
+						if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0])) {
+							print $error_output_fh "mismatch1of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\n";
+						} else {
+							print $error_output_fh "mismatch1of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\n";
+						}
 					} else { print $error_output_fh "mismatch2of2\t".$gene."\t".svref_2object($compare_func)->GV->NAME."\t".$sample."\t".$ref_data{$gene}{$sample}[0]."\t".$ref_data{$gene}{$sample}[1]."\t".$input_data{$gene}{$sample}[0]."\t".$input_data{$gene}{$sample}[0]."\n";}
 				} elsif (scalar @{$ref_data{$gene}{$sample}} == 1 && scalar @{$input_data{$gene}{$sample}} == 1) {
 					if (&$compare_func($ref_data{$gene}{$sample}[0],$input_data{$gene}{$sample}[0])) {
